@@ -8,6 +8,23 @@
 </head>
 <body>
     
+    <header class="topbar">
+        <h1>Mini Chat</h1>
+        <div class="actions">
+            <select id="voiceLang" title="Language">
+                <option value="en-US" selected>English (US)</option>
+                <option value="ru-RU" selected>Russian</option>
+                <option value="de-DE" selected>Deutsch</option>
+                <option value="fr-FR" selected>French</option>
+            </select>
+            <button id="listenBtn" title="Listen voice">Listen</button>
+            <button id="speakToggleBtn" title="Tell the response">Speak: Off</button>
+            <button id="toggleAiBtn" title="Turn AI on/off">AI: Off</button>
+            <button id="setupKeyBtn" title="Input API key">API Key</button>
+            <button id="clearBtn" title="Clear the chat">Clear</button>
+        </div>
+    </header>
+
     <script src="script.js"></script>
 </body>
 </html>
