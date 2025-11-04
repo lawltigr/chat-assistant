@@ -45,3 +45,72 @@ function speak(text, lang = getVoiceLang){
         console.warn('TTS error:', e);
     }
 }
+function speakIfEnabled(text){
+    if (getSpeakEnabled()) speak(text);
+}
+//STT (voice recognition) SpeakToText
+function getRecognition(){
+    //webkitSpeechRecognition is in Chrome/Edge;
+    const Ctor = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!Ctor) return null;
+    const rec = new Ctor();
+    rec.lang = getVoiceLang();
+    rec.interimResults = false;
+    rec.maxAlternatives = 1;
+    return rec;
+}
+function startListening(){
+    if (isListening) return;
+    recognition = getRecognition();
+    if (!recognition){
+        alert ('Speech recognition is not supported in this browser.');
+        return;
+    }
+    isListening = true;
+    listenBtn.textContent = 'Stop';
+    recognition.lang = getVoiceLang();
+    recognition.onresult = (e) => {
+        const text = (e.results?.[0]?.[0]?.transcript || '').trim();
+        if (text){
+            addUserMessage(text);
+            simulateBotReply(text);
+        }
+    };
+    recognition.onerror = (e) => {
+        console.warn('STT error:', e.error || e);
+    };
+    recognition.onend = () => {
+        isListening = false;
+        listenBtn.textContent = 'Listen';
+    };
+    try {
+        recognition.start();
+    } catch (e) {
+        console.warn('recognition.start error:', e);
+        isListening = false;
+        listenBtn.textContent = 'Listen';
+    }
+}
+function stopListening(){
+    if (!recognition || !isListening) return;
+    try {
+        recognition.stop();
+    } catch {}
+    isListening = false;
+    listenBtn.textContent = 'Listen';
+}
+
+listenBtn.addEventListener('click', () => {
+    if (isListening) stopListening(); elsestartListening();
+});
+speakToggleBtn.addEventListener('click', () => {
+    setSpeakEnabled(!getSpeakEnabled());
+});
+
+voiceLangSel.addEventListener('change', () => {
+    setVoiceLang(voiceLangSel.value);
+    if (isListening){
+        stopListening();
+        setTimeout(startListening, 100);
+    }
+});
