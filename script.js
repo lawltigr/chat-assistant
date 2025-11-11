@@ -3,10 +3,32 @@ const speakToggleBtn = document.getElementById('speakToggleBtn');
 const voiceLangSel = document.getElementById('voiceLang');
 const SPEAK_ENABLED_KEY = 'mini_chat_tts_enabled';
 const VOICE_LANG_KEY = 'mini_chat_voice_lang';
+let recognition = null;
+let isListening = false;
+
+function addUserMessage(text){
+    console.log('User: ', text);
+
+    const msg = document.createElement('div');
+    msg.classList.add('message');
+    msg.textContent = 'You: ' + text;
+    document.body.appendChild(msg);
+}
+function simulateBotReply(text){
+    const reply = 'You said: ' + text;
+    console.log('Bot: ', reply);
+    speakIfEnabled(reply);
+    const msg = document.createElement('div');
+    msg.classList.add('message');
+    msg.textContent = reply;
+    document.body.appendChild(msg);
+}
 
 function getSpeakEnabled(){
     return localStorage.getItem(SPEAK_ENABLED_KEY) === '1';
 }
+
+
 function setSpeakEnabled(on){
     localStorage.setItem(SPEAK_ENABLED_KEY, on ? '1' : '0');
     speakToggleBtn.textContent = 'Speak: ' + (on ? 'On' : 'Off');
@@ -21,7 +43,7 @@ function setVoiceLang(v){
 setSpeakEnabled(getSpeakEnabled());
 setVoiceLang(getVoiceLang());
 
-function speak(text, lang = getVoiceLang){
+function speak(text, lang = getVoiceLang()){
     try{
         if (!window.speechSynthesis) return;
         const utter = new SpeechSynthesisUtterance(text);
@@ -101,7 +123,10 @@ function stopListening(){
 }
 
 listenBtn.addEventListener('click', () => {
-    if (isListening) stopListening(); elsestartListening();
+    if (isListening) stopListening(); 
+    else {
+        startListening();
+    }
 });
 speakToggleBtn.addEventListener('click', () => {
     setSpeakEnabled(!getSpeakEnabled());
