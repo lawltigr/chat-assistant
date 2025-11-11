@@ -3,8 +3,26 @@ const speakToggleBtn = document.getElementById('speakToggleBtn');
 const voiceLangSel = document.getElementById('voiceLang');
 const SPEAK_ENABLED_KEY = 'mini_chat_tts_enabled';
 const VOICE_LANG_KEY = 'mini_chat_voice_lang';
+const API_KEY_KEY = 'mini_chat_api_key';
+const toggleAiBtn = document.getElementById('toggleAiBtn');
+const setupKeyBtn = document.getElementById('setupKeyBtn');
 let recognition = null;
 let isListening = false;
+
+
+function getApiKey(){
+    return localStorage.getItem(API_KEY_KEY) || '';
+}
+function setApiKey(k){
+    localStorage.setItem(API_KEY_KEY, (k || '').trim());
+}
+function isAiEnabled(){
+    return localStorage.getItem(AI_ENABLED_KEY) === '1';
+}
+function setAiEnabled(on){
+    localStorage.setItem(AI_ENABLED_KEY, on ? '1' : '0');
+    toggleAiBtn.textContent = 'AI: ' + (on ? 'On' : 'Off');
+}
 
 function addUserMessage(text){
     console.log('User: ', text);
