@@ -8,6 +8,8 @@ const toggleAiBtn = document.getElementById('toggleAiBtn');
 const setupKeyBtn = document.getElementById('setupKeyBtn');
 let recognition = null;
 let isListening = false;
+const AI_ENABLED_KEY = 'mini_chat_ai_enabled';
+const APU_KEY_KEY = 'mini_chat_api_key';
 
 
 function getApiKey(){
@@ -48,7 +50,7 @@ function currentEndpoint(){
     if (k.startsWith('sk-or-v1-')){
         return {
             url: 'https://openrouter.ai/api/v1/chat/completions',
-            model: 'openai/gpt-40-mini',
+            model: 'openai/gpt-4o-mini',
             extraHeaders: {
                 'HTTP-Referer': location.origin,
                 'X-Title': 'Mini Chat'
@@ -57,7 +59,7 @@ function currentEndpoint(){
     }
     return{
         url: 'https://api.openai.com/v1/chat/completions',
-        model: 'gpt-40-mini',
+        model: 'gpt-4o-mini',
         extraHeaders: {}
     };
 }
@@ -88,7 +90,7 @@ async function callAiChat(userText, temperature=0.7){
     const res = await fetch(ep.url, {
         method: 'POST',
         headers: {
-            'Authorization': 'Bearer' + apiKey,
+            'Authorization': 'Bearer ' + apiKey,
             'Content-Type': 'application/json',
             ...ep.extraHeaders
         },
@@ -112,14 +114,29 @@ function addUserMessage(text){
     msg.textContent = 'You: ' + text;
     document.body.appendChild(msg);
 }
-function simulateBotReply(text){
-    const reply = 'You said: ' + text;
-    console.log('Bot: ', reply);
-    speakIfEnabled(reply);
-    const msg = document.createElement('div');
-    msg.classList.add('message');
-    msg.textContent = reply;
-    document.body.appendChild(msg);
+async function simulateBotReply(text){
+    if (!isAiEnabled() || !getApiKey()){
+        const reply = 'You said: ' + text;
+        console.log('Bot: ', reply);
+        speakIfEnabled(reply);
+        const msg = document.createElement('div');
+        msg.classList.add('message');
+        msg.textContent = reply;
+        document.body.appendChild(msg);
+        return;
+    }
+    const loading = document.createElement('div');
+    loading.classList.add('message');
+    loading.textContent = 'Thinking...';
+    document.body.appendChild(loading);
+    try {
+        const ai = await callAiChat(text);
+        loading.textContent = ai;
+        speakIfEnabled(ai);
+    } catch (err){
+        loading.textContent = 'AI error: ' + (err.message || 'request failed');
+        speakIfEnabled(loading.textContent)
+    }
 }
 
 function getSpeakEnabled(){
