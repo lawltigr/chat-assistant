@@ -24,6 +24,86 @@ function setAiEnabled(on){
     toggleAiBtn.textContent = 'AI: ' + (on ? 'On' : 'Off');
 }
 
+setAiEnabled(isAiEnabled());
+toggleAiBtn.addEventListener('click', ()=> {
+    const on = !isAiEnabled();
+    if (on && !getApiKey()){
+        const k = prompt('Insert API key (OpenAI or OpenRouter). It will be saved in Local storage: ', '');
+        if (!k) return;
+        setApiKey(k);
+    }
+    setAiEnabled(on);
+});
+
+setupKeyBtn.addEventListener('click', () =>{
+    const current = getApiKey();
+    const k = prompt('API key (you can use OpenAI sj-... or OpenRouter sk-or-v1-...): ', current);
+    if (k != null) setApiKey(k);
+});
+
+function currentEndpoint(){
+    const k = getApiKey();
+    if (!k) return null;
+
+    if (k.startsWith('sk-or-v1-')){
+        return {
+            url: 'https://openrouter.ai/api/v1/chat/completions',
+            model: 'openai/gpt-40-mini',
+            extraHeaders: {
+                'HTTP-Referer': location.origin,
+                'X-Title': 'Mini Chat'
+            }
+        };
+    }
+    return{
+        url: 'https://api.openai.com/v1/chat/completions',
+        model: 'gpt-40-mini',
+        extraHeaders: {}
+    };
+}
+
+function lastMessagesAsOpenAi(n){
+    return [];
+}
+
+async function callAiChat(userText, temperature=0.7){
+    const apiKey = getApiKey();
+    if (!apiKey) throw new Error('No API Key');
+    const ep = currentEndpoint();
+    if (!ep) throw new Error('Endpoint not resolved');
+
+    const body = {
+        model: ep.model,
+        messages: [
+            {
+                role: 'system', content: 'You are a helpful assistant. Keep answers concise.'
+            }, 
+            ...lastMessagesAsOpenAi(6),
+            {
+                role: 'user', content: userText
+            }
+        ], 
+        temperature
+    };
+    const res = await fetch(ep.url, {
+        method: 'POST',
+        headers: {
+            'Authorization': 'Bearer' + apiKey,
+            'Content-Type': 'application/json',
+            ...ep.extraHeaders
+        },
+        body: JSON.stringify(body)
+    });
+    if (!res.ok){
+        const text = await res.text().catch(()=> '');
+        throw new Error(`HTTP ${res.status} ${res.statusText} ${text}`)
+    }
+    const data = await res.json();
+    const content = data?.choices?.[0]?.message?.content?.trim();
+    if (!content) throw new Error('Empty AI response');
+    return content;
+}
+
 function addUserMessage(text){
     console.log('User: ', text);
 
