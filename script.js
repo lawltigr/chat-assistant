@@ -12,6 +12,9 @@ const AI_ENABLED_KEY = 'mini_chat_ai_enabled';
 const APU_KEY_KEY = 'mini_chat_api_key';
 const clearBtn = document.getElementById('clearBtn');
 const VOICE_PITCH_KEY = 'mini_chat_voice_pitch';
+const VOICE_ID_KEY = 'mini_chat_voice_id';
+const voiceSelect = document.getElementById('voiceSelect');
+let availableVoices = [];
 
 
 function getApiKey(){
@@ -283,3 +286,23 @@ document.getElementById('voicePitch').addEventListener('input', (e) => {
 });
 
 speakIfEnabled(ai);
+
+function loadVoices(){
+    availableVoices = SpeechSynthesis.getVoices();
+    voiceSelect.innerHTML ='';
+
+    availableVoices.forEach((v, i) => {
+        const option = document.createElement('option');
+        option.value = v.voiceURI;
+        option.textContent = `${v.name} ($[v.lang])`;
+        voiceSelect.appendChild(option);
+    });
+
+    const saved = localStorage.getItem(VOICE_ID_KEY);
+    if (saved) voiceSelect.value = saved;
+}
+speechSynthesis.onvoiceschanged = loadVoices;
+loadVoices();
+voiceSelect.addEventListener('change', () => {
+    localStorage.setItem(VOICE_ID_KEY, voiceSelect.value);
+});
