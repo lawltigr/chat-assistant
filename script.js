@@ -10,6 +10,8 @@ let recognition = null;
 let isListening = false;
 const AI_ENABLED_KEY = 'mini_chat_ai_enabled';
 const APU_KEY_KEY = 'mini_chat_api_key';
+const clearBtn = document.getElementById('clearBtn');
+const VOICE_PITCH_KEY = 'mini_chat_voice_pitch';
 
 
 function getApiKey(){
@@ -163,6 +165,9 @@ function speak(text, lang = getVoiceLang()){
         if (!window.speechSynthesis) return;
         const utter = new SpeechSynthesisUtterance(text);
         utter.lang = lang;
+        utter.pitch = getVoicePitch();
+        utter.rate = 1;
+        utter.volume = 1;
         const pickVoice = () =>{
             const voices = speechSynthesis.getVoices() || [];
             const v = voices.find(v => v.lang === lang) || voices.find(v => v.lang.startsWith(lang.split('-')[0])) || voices[0];
@@ -254,3 +259,27 @@ voiceLangSel.addEventListener('change', () => {
         setTimeout(startListening, 100);
     }
 });
+
+clearBtn.addEventListener('click', () => {
+    if (!confirm('Are you sure you want to clear the chat?')) return;
+    const messages = document.querySelectorAll('.message');
+    messages.forEach(m => m.remove());
+    localStorage.removeItem('mini_chat_messages_v1');
+    if (window.messages) window.messages = [];
+    console.log('Chat cleared.');
+})
+
+function getVoicePitch(){
+    return parseFloat(localStorage.getItem(VOICE_PITCH_KEY)) || 1;
+}
+function setVoicePitch(v){
+    localStorage.setItem(VOICE_PITCH_KEY, v);
+    document.getElementById('voicePitch').value = v;
+}
+setVoicePitch(getVoicePitch());
+
+document.getElementById('voicePitch').addEventListener('input', (e) => {
+    setVoicePitch(e.target.value);
+});
+
+speakIfEnabled(ai);
