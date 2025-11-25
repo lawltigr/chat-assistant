@@ -288,13 +288,13 @@ document.getElementById('voicePitch').addEventListener('input', (e) => {
 speakIfEnabled(ai);
 
 function loadVoices(){
-    availableVoices = SpeechSynthesis.getVoices();
+    availableVoices = speechSynthesis.getVoices();
     voiceSelect.innerHTML ='';
 
     availableVoices.forEach((v, i) => {
         const option = document.createElement('option');
         option.value = v.voiceURI;
-        option.textContent = `${v.name} ($[v.lang])`;
+        option.textContent = `${v.name} (${v.lang})`;
         voiceSelect.appendChild(option);
     });
 
