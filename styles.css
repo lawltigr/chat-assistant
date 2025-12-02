@@ -15,13 +15,19 @@ body{
     background-color: rgb(170, 208, 241);
     padding: 5px;
     margin-bottom: 5px;
-    
+    border-radius: 5px;
 }
 .topbar h1{
     text-align: center;
     font-size: 40px;
+    margin-bottom: 10px;
     color: rgb(32, 82, 125);
 }
+.topbar h1:hover{
+    font-size: 50px;
+    margin-bottom: 0;
+}
+
 .topbar button{
     width: fit-content;
     padding: 8px;
@@ -41,13 +47,31 @@ body{
     background-color:  rgb(202, 28, 28);
     color:  rgb(230, 140, 140);
 }
-.topbar select{
+label{
     width: fit-content;
-    padding: 5px;
+    padding: 8px;
     border: none;
     font-size: 20px;
     border-radius: 5px;
-    margin: 10 auto;
+    margin: 5px;
+    background-color: none;
+    color: rgb(32, 82, 125);
+    transition: 0.1s;
+}
+label:hover{
+    background-color: rgb(137, 189, 235);
+}
+input{
+    background-color: rgb(32, 82, 125);
+}
+
+.topbar select{
+    width: fit-content;
+    padding: 8px;
+    border: none;
+    font-size: 20px;
+    border-radius: 5px;
+    margin: 5px;
     background-color: rgb(137, 189, 235);
     color: rgb(32, 82, 125);
 }
