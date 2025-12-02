@@ -9,7 +9,6 @@ const setupKeyBtn = document.getElementById('setupKeyBtn');
 let recognition = null;
 let isListening = false;
 const AI_ENABLED_KEY = 'mini_chat_ai_enabled';
-const APU_KEY_KEY = 'mini_chat_api_key';
 const clearBtn = document.getElementById('clearBtn');
 const VOICE_PITCH_KEY = 'mini_chat_voice_pitch';
 const VOICE_ID_KEY = 'mini_chat_voice_id';
@@ -171,20 +170,37 @@ function speak(text, lang = getVoiceLang()){
         utter.pitch = getVoicePitch();
         utter.rate = 1;
         utter.volume = 1;
-        const pickVoice = () =>{
-            const voices = speechSynthesis.getVoices() || [];
-            const v = voices.find(v => v.lang === lang) || voices.find(v => v.lang.startsWith(lang.split('-')[0])) || voices[0];
-            if (v) utter.voice = v;
-        };
+
+
+        // const pickVoice = () =>{
+        //     const voices = speechSynthesis.getVoices() || [];
+        //     const v = voices.find(v => v.lang === lang) || voices.find(v => v.lang.startsWith(lang.split('-')[0])) || voices[0];
+        //     if (v) utter.voice = v;
+        // };
+        const saved = localStorage.getItem(VOICE_ID_KEY);
         let voices = speechSynthesis.getVoices();
-        if (!voices || voices.length === 0){
-            speechSynthesis.onvoiceschanged = () =>{
-                pickVoice(); speechSynthesis.speak(utter);
-            };
+
+        if (saved) {
+            const match = voices.find(v => v.voiceURI === saved);
+            if (match) utter.voice = match;
         }
-        else{
-            pickVoice(); speechSynthesis.speak(utter);
+        if (!utter.voice) {
+            utter.voice =
+                voices.find(v => v.lang === lang) ||
+                voices.find(v => v.lang.startsWith(lang.split('-')[0]))||
+                voices[0];
         }
+        speechSynthesis.cancel();
+        speechSynthesis.speak(utter);
+
+        // if (!voices || voices.length === 0){
+        //     speechSynthesis.onvoiceschanged = () =>{
+        //         pickVoice(); speechSynthesis.speak(utter);
+        //     };
+        // }
+        // else{
+        //     pickVoice(); speechSynthesis.speak(utter);
+        // }
     }
     catch (e){
         console.warn('TTS error:', e);
@@ -285,7 +301,7 @@ document.getElementById('voicePitch').addEventListener('input', (e) => {
     setVoicePitch(e.target.value);
 });
 
-speakIfEnabled(ai);
+// speakIfEnabled(ai);
 
 function loadVoices(){
     availableVoices = speechSynthesis.getVoices();
